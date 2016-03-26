@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<!--[if lt IE 7]> <html class="lt-ie9 lt-ie8 lt-ie7" lang="ru"> <![endif]-->
+<!--[if IE 7]> <html class="lt-ie9 lt-ie8 ie7" lang="ru"> <![endif]-->
+<!--[if IE 8]> <html class="lt-ie9" lang="ru"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="ru"> <!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    {% block page_meta %}
+        <title>zoolab</title>
+    {% endblock %}
+    <meta name="viewport" content="width=device-width">
+    {% include "templatetags/stylesheets.html" %}
+
+</head>
+
+<body>
+
+<div class="main-content-wrapper">
+    {% block main_content %}{% endblock %}
+    <div class="footer-placeholder"></div>
+</div>
+
+<div class="footer-wrapper">
+    <div class="container">
+        <div class="row">
+
+        </div>
+    </div>
+</div>
+
+{% include "templatetags/pagescripts.html" %}
+
+</body>
+</html>
