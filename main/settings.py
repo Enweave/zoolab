@@ -125,4 +125,6 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 STATIC_URL = '/static/'
 
 
-INSTALLED_APPS += ["animals"]
+INSTALLED_APPS += ("animals",)
+
+INSTALLED_APPS += ('widget_tweaks',)

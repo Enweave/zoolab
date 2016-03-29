@@ -1,0 +1,6 @@
+<nav>
+    <ul class="nav nav-pills nav-stacked">
+        <li class="nav-item {% if nav_selected == 0 %}active{% endif %}"><a href="{% url "animals:supplies" %}"><span class="glyphicon glyphicon-play-circle"></span>  Поставки</a></li>
+        <li class="nav-item {% if nav_selected == 1 %}active{% endif %}"><a href="{% url "animals:reports" %}"><span class="glyphicon glyphicon-list-alt"></span>  Отчёты</a></li>
+    </ul>
+</nav>

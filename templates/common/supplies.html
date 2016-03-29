@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block page_meta %}
+    <title>Поставки</title>
+{% endblock %}
+
+{% block breaducrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li class="active">Поставки</li>
+    </ol>
+{% endblock %}
+
+{% block main_content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-sm-6">
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        <div class="form-group{% if field.errors %} has-error{% endif %}{% if field.is_hidden %} hidden{% endif %}">
+                            <label class="control-label">{{ field.label }}</label>
+                            {{ field }}
+                            {{ field.errors.as_text }}
+                        </div>
+                    {% endfor %}
+                    <button class="btn-primary btn">submit</button>
+                </form>
+            </div>
+            <div class="col-xs-12 col-sm-6">
+                {% if supplies %}
+                    {% for supply in supplies %}
+
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-warning" role="alert">Поставок нет</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

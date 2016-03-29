@@ -18,6 +18,24 @@
 <body>
 
 <div class="main-content-wrapper">
+    <div class="container">
+        <div class="page-header">
+            <div class="row">
+                <div class="col-xs-12 col-sm-6">
+                    <h1><a href="/"><span class="glyphicon glyphicon-grain"></span></a> Zoolab</h1>
+                </div>
+                <div class="col-xs-12 col-sm-6">
+                    {% include "templatetags/navigation.html" %}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                {% block breaducrumbs %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
     {% block main_content %}{% endblock %}
     <div class="footer-placeholder"></div>
 </div>
