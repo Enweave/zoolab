@@ -163,15 +163,13 @@ var bind_supplies = function($container) {
     });
 };
 
+var rice = function($container, f) {
+    if ($container.length>0) {f($container)}
+};
+
 $(document).ready(function() {
+    rice($("#supply_form"),bind_supply_form);
+    rice($("#supplies_container"),bind_supplies);
 
-    var $form = $("#supply_form");
-    var $supplies_container = $("#supplies_container");
-    if ($form.length > 0) {
-        bind_supply_form($form);
-    }
 
-    if ($supplies_container.length > 0) {
-        bind_supplies($supplies_container);
-    }
 });
