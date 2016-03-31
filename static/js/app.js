@@ -1,22 +1,110 @@
+var getCookie = function(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
+var csrftoken = getCookie('csrftoken');
+
 $(document).ready(function() {
     "use strict";
-    // owl-carousel
-//    <img src="http://flickholdr.com/640/480/2" alt="placeholder image"/>
-    var $slider = $('.owl-carousel');
 
-//    var image_count = 5;
-//    for (var i=1; i<image_count; i++) {
-//        $slider.append('<img src="http://lorempixel.com/1024/768/'+i+'" alt="placeholder image"/>');
-//    }
-    $slider.owlCarousel({
-        items: 1,
-        margin: 100,
-        singleItem: true,
-        pagination: false,
-        navigation: true,
-        navigationText: [
-            '<span class="glyphicon glyphicon-chevron-left"></span>',
-            '<span class="glyphicon glyphicon-chevron-right"></span>'
-        ]
-    });
+    var $form = $("#supply_form");
+    if ($form.length > 0) {
+        var get_animals_url = "/get_animals/";
+        var get_consumables_url = "/get_consumables/";
+        var $extra_fields = $("#extra_fields");
+        var $btn_add_animal = $("#add_animal");
+        var $btn_add_consumable = $("#add_consumable");
+
+        $('[name="date"]').datepicker({
+            format: "dd/mm/yyyy",
+            weekStart: 1,
+            todayBtn: "linked",
+            language: "ru"
+        });
+
+        var validator = $form.validate({
+            ignore: [],
+            errorPlacement:  function(error, element) {
+                element.parent().toggleClass("has-error", true);
+            },
+            success: function(label, element) {
+                $(element).parent().toggleClass("has-error", false);
+            }
+        });
+
+        $btn_add_animal.on("click", function () {
+            $.ajax({
+                url: get_animals_url,
+                type: 'POST',
+                data: {
+                    csrfmiddlewaretoken: csrftoken
+                },
+
+                success: function (data) {
+                    if (data["html"]) {
+                        var $new_form = $(data["html"]);
+                        var $body = $new_form.find('[data-role="form-body"]');
+                        $new_form.find('[data-action="remove"]').on("click",function() {
+                            $new_form.remove();
+                        });
+                        $new_form.find('[data-action="collapse"]').on("click", function() {
+                            $body.toggleClass("collapse");
+                        });
+                        $extra_fields.append($new_form);
+                    } else {
+                        alert("error!");
+                    }
+                },
+                error: function (textStatus) {
+                    try {
+                        console.log(textStatus)
+                    } catch (e) {
+                    }
+                }
+            });
+        });
+
+        $btn_add_consumable.on("click", function () {
+            $.ajax({
+                url: get_consumables_url,
+                type: 'POST',
+                data: {
+                    csrfmiddlewaretoken: csrftoken
+                },
+
+                success: function (data) {
+                    if (data["html"]) {
+                        var $new_form = $(data["html"]);
+                        var $body = $new_form.find('[data-role="form-body"]');
+                        $new_form.find('[data-action="remove"]').on("click",function() {
+                            $new_form.remove();
+                        });
+                        $new_form.find('[data-action="collapse"]').on("click", function() {
+                            $body.toggleClass("collapse");
+                        });
+                        $extra_fields.append($new_form);
+                    } else {
+                        alert("error!");
+                    }
+                },
+                error: function (textStatus) {
+                    try {
+                        console.log(textStatus)
+                    } catch (e) {
+                    }
+                }
+            });
+        });
+    }
 });

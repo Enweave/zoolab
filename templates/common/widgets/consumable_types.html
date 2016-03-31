@@ -1,0 +1,23 @@
+{% load widget_tweaks %}
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <h3 class="pull-left">+ Потребность</h3>
+        <div data-action="remove" class="pull-right btn btn-danger btn-sm"><i class="glyphicon glyphicon-remove"></i></div>
+        <div data-action="collapse" class="pull-right btn btn-default btn-sm"><i class="glyphicon glyphicon-arrow-down"></i></div>
+    </div>
+    <div data-role="form-body" class="panel-body">
+        {% for field in form %}
+            <div class="form-group{% if field.is_hidden %} hidden{% endif %}">
+                <label class="control-label">{{ field.label }}</label>
+                {% if field.field.required %}
+                    {{ field|append_attr:"required:required"|add_class:"form-control" }}
+                {% else %}
+                    {{ field|add_class:"form-control"}}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="form-group">
+            <div data-action="collapse" class="btn btn-primary">ok</div>
+        </div>
+    </div>
+</div>

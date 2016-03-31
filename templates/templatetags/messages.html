@@ -1,0 +1,7 @@
+{% if messages %}
+    <div class="col-xs-12">
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message|safe }}</div>
+        {% endfor %}
+    </div>
+{% endif %}

@@ -6,6 +6,10 @@ from animals.models import AnimalType
 from animals.models import AnimalNeed
 from animals.models import ConsumableType
 from animals.models import ConsumableGroup
+from animals.models import SuppliedAnimal
+from animals.models import SuppliedConsumable
+from animals.models import Supply
+
 
 
 class AnimalGroupAdmin(admin.ModelAdmin):
@@ -42,4 +46,6 @@ class AnimalNeedAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AnimalNeed, AnimalNeedAdmin)
+
+admin.site.register(Supply)
 

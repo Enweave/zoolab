@@ -16,23 +16,81 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12 col-sm-6">
-                <form method="post">
+                <h2>Добавить поставку</h2>
+                <form method="post" id="supply_form">
                     {% csrf_token %}
 
                     {% for field in form %}
                         <div class="form-group{% if field.errors %} has-error{% endif %}{% if field.is_hidden %} hidden{% endif %}">
                             <label class="control-label">{{ field.label }}</label>
-                            {{ field }}
-                            {{ field.errors.as_text }}
+                            {% if field.field.required %}
+                                {{ field|append_attr:"required:required"|add_class:"form-control" }}
+                            {% else %}
+                                {{ field|add_class:"form-control"}}
+                            {% endif %}
                         </div>
                     {% endfor %}
-                    <button class="btn-primary btn">submit</button>
+                    <div id="form_actions" class="form-group">
+                        <div id="add_animal" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i> Добавить животное</div>
+                        <div id="add_consumable" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i> Добавить потребность</div>
+                    </div>
+                    <div id="extra_fields">
+
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" class="btn-primary btn btn-lg" value="добавить">
+                    </div>
                 </form>
             </div>
             <div class="col-xs-12 col-sm-6">
                 {% if supplies %}
                     {% for supply in supplies %}
+                        <table class="table table-striped">
+                            <caption class="bg-primary text-center text-uppercase">{{ supply }}</caption>
+                            <tbody>
+                            {% if supply.get_animals %}
+                                <tr>
+                                    <th>Животное</th>
+                                    <th>Количество</th>
+                                    <th>Пол</th>
+                                </tr>
+                                {% for animal in supply.get_animals %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ animal.animal_type }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong>{{ animal.animal_count }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong>{{ animal.get_gender_display }}</strong>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
 
+                            {% if supply.get_consumables %}
+                                <tr>
+                                    <th>Потребность</th>
+                                    <th>Тип потребности</th>
+                                    <th>Количество</th>
+                                </tr>
+                                {% for consumable in supply.get_consumables %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ consumable.consumable_type }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong>{{ consumable.consumable_type.group }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong>{{ consumable.consumable_count }}</strong>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                            </tbody>
+                        </table>
                     {% endfor %}
                 {% else %}
                     <div class="alert alert-warning" role="alert">Поставок нет</div>
