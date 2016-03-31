@@ -1,3 +1,5 @@
+"use strict";
+
 var getCookie = function(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -13,98 +15,163 @@ var getCookie = function(name) {
     }
     return cookieValue;
 };
+
 var csrftoken = getCookie('csrftoken');
 
-$(document).ready(function() {
-    "use strict";
+var bind_supply_form = function($form) {
+    var get_animals_url = "/get_animals/";
+    var get_consumables_url = "/get_consumables/";
 
-    var $form = $("#supply_form");
-    if ($form.length > 0) {
-        var get_animals_url = "/get_animals/";
-        var get_consumables_url = "/get_consumables/";
-        var $extra_fields = $("#extra_fields");
-        var $btn_add_animal = $("#add_animal");
-        var $btn_add_consumable = $("#add_consumable");
+    var $fieldsets_container = $("#extra_fields");
 
-        $('[name="date"]').datepicker({
-            format: "dd/mm/yyyy",
-            weekStart: 1,
-            todayBtn: "linked",
-            language: "ru"
+    var $btn_add_animal = $("#add_animal");
+    var $btn_add_consumable = $("#add_consumable");
+
+    var validator = $form.validate({
+        ignore: [],
+        errorPlacement:  function(error, element) {
+            element.parent().toggleClass("has-error", true);
+        },
+        success: function(label, element) {
+            $(element).parent().toggleClass("has-error", false);
+        }
+    });
+
+    var bind_fieldset = function($fieldset) {
+        var $body = $fieldset.find('[data-role="form-body"]');
+        var $title = $fieldset.find('[data-role="fieldset-title"]');
+        var $collapse = $fieldset.find('[data-action="collapse"]');
+
+        var $name_source = $fieldset.find('[data-role="fieldset-name-source"]');
+
+        var $fields = $fieldset.find("input, select");
+
+        if ($name_source.is("select")) {
+            $name_source.on("change", function() {
+                $title.html($name_source.find(":selected").text());
+            });
+        } else {
+            $name_source.on("change", function(){
+                $title.html($name_source.val());
+            });
+        }
+
+        $fieldset.find('[data-action="remove"]').on("click",function() {
+            $fieldset.remove();
         });
 
-        var validator = $form.validate({
-            ignore: [],
-            errorPlacement:  function(error, element) {
-                element.parent().toggleClass("has-error", true);
-            },
-            success: function(label, element) {
-                $(element).parent().toggleClass("has-error", false);
+        $collapse.on("click", function() {
+            var valid = true;
+            $fields.each(function(i, el) {
+                valid = validator.element($fields.eq(i)) === false ? false : valid;
+            });
+            if (valid === true) {
+                $body.toggleClass("collapse");
+                $collapse.toggle();
             }
         });
 
-        $btn_add_animal.on("click", function () {
+        $fieldsets_container.append($fieldset);
+    };
+
+    var insert_fieldset = function(url) {
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: csrftoken
+            },
+
+            success: function (data) {
+                if (data["html"]) {
+                    bind_fieldset($(data["html"]));
+                } else {
+                    alert("Что-то пошло не так!(((");
+                }
+            },
+            error: function (textStatus) {
+                try {
+                    console.log(textStatus)
+                } catch (e) {
+                }
+            }
+        });
+    };
+
+    $('[name="date"]').datepicker({
+        format: "dd/mm/yyyy",
+        weekStart: 1,
+        todayBtn: "linked",
+        language: "ru"
+    });
+
+    $btn_add_animal.on("click", function () {
+        insert_fieldset(get_animals_url);
+    });
+
+    $btn_add_consumable.on("click", function () {
+        insert_fieldset(get_consumables_url);
+    });
+};
+
+var bind_supplies = function($container) {
+
+    var active_requests = [];
+    var $supplies = $container.find('[data-role="supply"]');
+
+    var remove_supply = function(url, request_id) {
+        if (typeof active_requests[request_id] === "undefined") {
+            active_requests[request_id] = 0;
             $.ajax({
-                url: get_animals_url,
+                url: url,
                 type: 'POST',
                 data: {
-                    csrfmiddlewaretoken: csrftoken
+                    csrfmiddlewaretoken: csrftoken,
+                    confirm: true
                 },
-
                 success: function (data) {
-                    if (data["html"]) {
-                        var $new_form = $(data["html"]);
-                        var $body = $new_form.find('[data-role="form-body"]');
-                        $new_form.find('[data-action="remove"]').on("click",function() {
-                            $new_form.remove();
-                        });
-                        $new_form.find('[data-action="collapse"]').on("click", function() {
-                            $body.toggleClass("collapse");
-                        });
-                        $extra_fields.append($new_form);
+                    if (data["success"] === true ) {
+                        $supplies.eq(request_id).fadeOut(150, function(){
+                            $supplies.eq(request_id).remove();
+                        })
                     } else {
-                        alert("error!");
+                        active_requests[request_id] = undefined;
+                        alert("Что-то пошло не так!(((");
                     }
                 },
                 error: function (textStatus) {
+                    active_requests[request_id] = undefined;
                     try {
                         console.log(textStatus)
                     } catch (e) {
                     }
                 }
             });
-        });
+        }
 
-        $btn_add_consumable.on("click", function () {
-            $.ajax({
-                url: get_consumables_url,
-                type: 'POST',
-                data: {
-                    csrfmiddlewaretoken: csrftoken
-                },
 
-                success: function (data) {
-                    if (data["html"]) {
-                        var $new_form = $(data["html"]);
-                        var $body = $new_form.find('[data-role="form-body"]');
-                        $new_form.find('[data-action="remove"]').on("click",function() {
-                            $new_form.remove();
-                        });
-                        $new_form.find('[data-action="collapse"]').on("click", function() {
-                            $body.toggleClass("collapse");
-                        });
-                        $extra_fields.append($new_form);
-                    } else {
-                        alert("error!");
-                    }
-                },
-                error: function (textStatus) {
-                    try {
-                        console.log(textStatus)
-                    } catch (e) {
-                    }
-                }
-            });
+    };
+
+
+    $supplies.each(function(i){
+        $supplies.eq(i).find('[data-action="remove-supply"]').on("click", function(e) {
+            e.preventDefault();
+            if (confirm("Удалить?")) {
+                remove_supply(this.href,i);
+            }
         });
+    });
+};
+
+$(document).ready(function() {
+
+    var $form = $("#supply_form");
+    var $supplies_container = $("#supplies_container");
+    if ($form.length > 0) {
+        bind_supply_form($form);
+    }
+
+    if ($supplies_container.length > 0) {
+        bind_supplies($supplies_container);
     }
 });

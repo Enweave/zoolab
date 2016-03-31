@@ -48,4 +48,6 @@ class AnimalNeedAdmin(admin.ModelAdmin):
 admin.site.register(AnimalNeed, AnimalNeedAdmin)
 
 admin.site.register(Supply)
+admin.site.register(SuppliedAnimal)
+admin.site.register(SuppliedConsumable)
 

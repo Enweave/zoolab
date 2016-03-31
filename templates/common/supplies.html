@@ -30,68 +30,25 @@
                             {% endif %}
                         </div>
                     {% endfor %}
-                    <div id="form_actions" class="form-group">
-                        <div id="add_animal" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i> Добавить животное</div>
-                        <div id="add_consumable" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i> Добавить потребность</div>
-                    </div>
+
                     <div id="extra_fields">
 
                     </div>
+
+                    <div id="form_actions" class="form-group">
+                        <div id="add_animal" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i> животное</div>
+                        <div id="add_consumable" class="btn btn-success"><i class="glyphicon glyphicon-plus-sign"></i> потребность</div>
+                    </div>
+
                     <div class="form-group">
-                        <input type="submit" class="btn-primary btn btn-lg" value="добавить">
+                        <button type="submit" class="btn-primary btn btn-lg"><i class="glyphicon glyphicon-save-file"></i> СОХРАНИТЬ</button>
                     </div>
                 </form>
             </div>
             <div class="col-xs-12 col-sm-6">
                 {% if supplies %}
-                    {% for supply in supplies %}
-                        <table class="table table-striped">
-                            <caption class="bg-primary text-center text-uppercase">{{ supply }}</caption>
-                            <tbody>
-                            {% if supply.get_animals %}
-                                <tr>
-                                    <th>Животное</th>
-                                    <th>Количество</th>
-                                    <th>Пол</th>
-                                </tr>
-                                {% for animal in supply.get_animals %}
-                                    <tr>
-                                        <td>
-                                            <strong>{{ animal.animal_type }}</strong>
-                                        </td>
-                                        <td>
-                                            <strong>{{ animal.animal_count }}</strong>
-                                        </td>
-                                        <td>
-                                            <strong>{{ animal.get_gender_display }}</strong>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            {% endif %}
-
-                            {% if supply.get_consumables %}
-                                <tr>
-                                    <th>Потребность</th>
-                                    <th>Тип потребности</th>
-                                    <th>Количество</th>
-                                </tr>
-                                {% for consumable in supply.get_consumables %}
-                                    <tr>
-                                        <td>
-                                            <strong>{{ consumable.consumable_type }}</strong>
-                                        </td>
-                                        <td>
-                                            <strong>{{ consumable.consumable_type.group }}</strong>
-                                        </td>
-                                        <td>
-                                            <strong>{{ consumable.consumable_count }}</strong>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            {% endif %}
-                            </tbody>
-                        </table>
-                    {% endfor %}
+                    <h2>Поставки</h2>
+                    {% include "common/widgets/supplies_table.html" with supplies=supplies %}
                 {% else %}
                     <div class="alert alert-warning" role="alert">Поставок нет</div>
                 {% endif %}

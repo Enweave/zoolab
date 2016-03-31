@@ -1,0 +1,60 @@
+<div id="supplies_container">
+    {% for supply in supplies %}
+        <table class="table table-striped" data-role="supply">
+            <caption class="bg-primary text-center text-uppercase">{{ supply }} <a data-action="remove-supply" href="{% url "animals:remove_supply" supply.id %}" class="btn btn-danger btn-sm pull-right"><i class="glyphicon glyphicon-remove"></i></a></caption>
+            <tbody>
+            {% if supply.get_animals %}
+                <tr>
+                    <th colspan="3" class="text-center bg-warning">
+                        Животные
+                    </th>
+                </tr>
+                <tr>
+                    <th>Название</th>
+                    <th>Количество</th>
+                    <th>Пол</th>
+                </tr>
+                {% for animal in supply.get_animals %}
+                    <tr>
+                        <td>
+                            {{ animal.animal_type }}
+                        </td>
+                        <td>
+                            {{ animal.animal_count }}
+                        </td>
+                        <td>
+                            {{ animal.get_gender_display }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+
+            {% if supply.get_consumables %}
+                <tr>
+                    <th colspan="3" class="text-center bg-info">
+                        Потребности
+                    </th>
+                </tr>
+                <tr>
+                    <th>Название</th>
+                    <th>Тип</th>
+                    <th>Количество</th>
+                </tr>
+                {% for consumable in supply.get_consumables %}
+                    <tr>
+                        <td>
+                            {{ consumable.consumable_type }}
+                        </td>
+                        <td>
+                            {{ consumable.consumable_type.group }}
+                        </td>
+                        <td>
+                            {{ consumable.consumable_count }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    {% endfor %}
+</div>

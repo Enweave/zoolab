@@ -1,9 +1,9 @@
 {% load widget_tweaks %}
 <div class="panel panel-default">
     <div class="panel-heading clearfix">
-        <h3 class="pull-left">+ Животное</h3>
+        <h4 class="pull-left"><span data-role="fieldset-title">{{ item_name }}</span></h4>
         <div data-action="remove" class="pull-right btn btn-danger btn-sm"><i class="glyphicon glyphicon-remove"></i></div>
-        <div data-action="collapse" class="pull-right btn btn-default btn-sm"><i class="glyphicon glyphicon-arrow-down"></i></div>
+        <div data-action="collapse" style="display: none" class="pull-right btn btn-default btn-sm">изменить <i class="glyphicon glyphicon-wrench"></i></div>
     </div>
     <div data-role="form-body" class="panel-body">
         {% for field in form %}
@@ -17,7 +17,7 @@
             </div>
         {% endfor %}
         <div class="form-group">
-            <div data-action="collapse" class="btn btn-primary">ok</div>
+            <div data-action="collapse" class="btn btn-primary"><i class="glyphicon glyphicon-ok"></i> Подтвердить</div>
         </div>
     </div>
 </div>

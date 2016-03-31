@@ -23,8 +23,16 @@ class AddAnimalForm(forms.ModelForm):
         model = SuppliedAnimal
         exclude = ("supply",)
 
+    def __init__(self):
+        super(AddAnimalForm, self).__init__()
+        self.fields['animal_type'].widget.attrs.update({"data-role": "fieldset-name-source"})
+
 
 class AddConsumableForm(forms.ModelForm):
     class Meta:
         model = SuppliedConsumable
         exclude = ("supply",)
+
+    def __init__(self):
+        super(AddConsumableForm, self).__init__()
+        self.fields['consumable_type'].widget.attrs.update({"data-role": "fieldset-name-source"})

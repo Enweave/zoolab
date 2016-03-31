@@ -9,21 +9,28 @@ from animals.forms import SupplyForm, AddAnimalForm, AddConsumableForm
 from animals.models import Supply, AnimalType, AnimalGroup, SuppliedAnimal, SuppliedConsumable, ConsumableType
 from django.contrib import messages
 
+
 def get_animals(request):
-    form = AddAnimalForm()
-    html = render_to_string("common/widgets/animal_types.html", locals())
-    return JsonResponse({"html": html})
+    if request.is_ajax():
+        form = AddAnimalForm()
+        item_name = u'Животное'
+        html = render_to_string("common/widgets/supplies_fieldset.html", locals())
+        return JsonResponse({"html": html})
+    return HttpResponseRedirect("/")
 
 
 def get_consumables(request):
-    form = AddConsumableForm()
-    html = render_to_string("common/widgets/consumable_types.html", locals())
-    return JsonResponse({"html": html})
+    if request.is_ajax():
+        form = AddConsumableForm()
+        item_name = u'Потребность'
+        html = render_to_string("common/widgets/supplies_fieldset.html", locals())
+        return JsonResponse({"html": html})
+    return HttpResponseRedirect("/")
 
 
 def supplies_page(request):
     nav_selected = 0
-    supplies = Supply.objects.all()
+    supplies = Supply.objects.all().order_by("-date")
 
     form = SupplyForm()
     if request.POST:
@@ -70,6 +77,20 @@ def supplies_page(request):
                 messages.success(request, u"Успешно добавлена %s" % new_supply)
             return HttpResponseRedirect(reverse('animals:supplies'))
     return render(request, "common/supplies.html", locals())
+
+
+def remove_supply(request, pk):
+    if request.POST and request.is_ajax():
+        supplies = Supply.objects.filter(id=pk)
+        if supplies:
+            if request.POST.get("confirm"):
+                supplies[0].delete()
+                return JsonResponse({"success": True})
+            return JsonResponse({"success": False})
+        else:
+            return JsonResponse({"success": False})
+
+    return HttpResponseRedirect("/")
 
 
 def reports_page(request):
