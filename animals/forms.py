@@ -5,17 +5,18 @@ from django import forms
 
 
 class SupplyForm(forms.Form):
-    BASE_ATTRS = {"class": "form-control"}
-    date = forms.DateField(widget=forms.DateInput(), label=u"Дата поступления",input_formats=["%d/%m/%Y"])
+    date = forms.DateField(
+        widget=forms.DateInput(),
+        label=u"Дата поступления",
+        input_formats=["%d/%m/%Y"]
+    )
+
     comment = forms.CharField(
         widget=forms.Textarea(attrs={
             "rows": 3,
         }),
         label=u"Комментарий"
     )
-
-    # animals = forms.CharField(widget=forms.HiddenInput())
-    # consumables = forms.CharField(widget=forms.HiddenInput())
 
 
 class AddAnimalForm(forms.ModelForm):
@@ -36,3 +37,17 @@ class AddConsumableForm(forms.ModelForm):
     def __init__(self):
         super(AddConsumableForm, self).__init__()
         self.fields['consumable_type'].widget.attrs.update({"data-role": "fieldset-name-source"})
+
+
+class ReportForm(forms.Form):
+    date_from = forms.DateField(
+        widget=forms.DateInput(),
+        label=u"От",
+        input_formats=["%d/%m/%Y"]
+    )
+
+    date_to = forms.DateField(
+        widget=forms.DateInput(),
+        label=u"До",
+        input_formats=["%d/%m/%Y"]
+    )

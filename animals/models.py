@@ -56,7 +56,8 @@ class Supply(models.Model):
         return SuppliedConsumable.objects.filter(supply=self)
 
     def __unicode__(self):
-        return "Поставка от %s" %  self.date
+        return "Поставка %s" % self.id
+
 
 class SuppliedAnimal(models.Model):
     # TODO: change animal_gender to IntegerField
@@ -73,8 +74,14 @@ class SuppliedAnimal(models.Model):
     def get_gender_display(self):
         return next((i[1] for i in self.GENDERS if i[0] == self.animal_gender), None)
 
+    def __unicode__(self):
+        return u"%s %s x %s" % (self.animal_type, self.get_gender_display(), self.animal_count)
+
 
 class SuppliedConsumable(models.Model):
     consumable_type = models.ForeignKey(ConsumableType, verbose_name="Потребность")
     consumable_count = models.IntegerField(verbose_name=u"Количество")
     supply = models.ForeignKey(Supply)
+
+    def __unicode__(self):
+        return u"%s x %s" % (self.consumable_type.name, self.consumable_count)

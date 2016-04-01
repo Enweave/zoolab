@@ -18,6 +18,13 @@ var getCookie = function(name) {
 
 var csrftoken = getCookie('csrftoken');
 
+var datepicker_defaults = {
+        format: "dd/mm/yyyy",
+        weekStart: 1,
+        todayBtn: "linked",
+        language: "ru"
+    };
+
 var bind_supply_form = function($form) {
     var get_animals_url = "/get_animals/";
     var get_consumables_url = "/get_consumables/";
@@ -98,12 +105,7 @@ var bind_supply_form = function($form) {
         });
     };
 
-    $('[name="date"]').datepicker({
-        format: "dd/mm/yyyy",
-        weekStart: 1,
-        todayBtn: "linked",
-        language: "ru"
-    });
+    $('[name="date"]').datepicker(datepicker_defaults);
 
     $btn_add_animal.on("click", function () {
         insert_fieldset(get_animals_url);
@@ -167,9 +169,14 @@ var rice = function($container, f) {
     if ($container.length>0) {f($container)}
 };
 
+var bind_report_form = function() {
+    var $form = $("#report_form");
+    $form.find('[name="date_from"],[name="date_to"]').datepicker(datepicker_defaults);
+    var $report_container = $("#report_continer");
+};
+
 $(document).ready(function() {
     rice($("#supply_form"),bind_supply_form);
     rice($("#supplies_container"),bind_supplies);
-
-
+    bind_report_form();
 });

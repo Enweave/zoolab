@@ -1,0 +1,18 @@
+{% load widget_tweaks %}
+
+<form method="post" action="{% url "animals:reports" %}" id="report_form">
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="form-group{% if field.is_hidden %} hidden{% endif %}">
+            <label class="control-label">{{ field.label }}</label>
+            {% if field.field.required %}
+                {{ field|append_attr:"required:required"|add_class:"form-control" }}
+            {% else %}
+                {{ field|add_class:"form-control"}}
+            {% endif %}
+        </div>
+    {% endfor %}
+    <div class="form-group">
+        <button type="submit" class="btn-primary btn btn-lg">ПОСЧИТАТЬ</button>
+    </div>
+</form>

@@ -13,9 +13,20 @@
 
 {% block main_content %}
     <div class="container">
-
         <div class="row">
-
+            <div id="report_continer" class="col-xs-12 col-sm-9">
+                {% for item in animals %}
+                    <p>{{ item }}</p>
+                {% endfor %}
+                <p>---</p>
+                {% for item in consumables %}
+                    <p>{{ item }}</p>
+                {% endfor %}
+                <hr>
+            </div>
+            <div  class="col-xs-12 col-sm-3">
+                {% include "common/widgets/report_form.html" with form=report_form %}
+            </div>
         </div>
     </div>
 {% endblock %}

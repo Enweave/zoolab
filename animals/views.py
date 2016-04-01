@@ -5,7 +5,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
-from animals.forms import SupplyForm, AddAnimalForm, AddConsumableForm
+from animals.forms import SupplyForm, AddAnimalForm, AddConsumableForm, ReportForm
 from animals.models import Supply, AnimalType, AnimalGroup, SuppliedAnimal, SuppliedConsumable, ConsumableType
 from django.contrib import messages
 
@@ -95,4 +95,16 @@ def remove_supply(request, pk):
 
 def reports_page(request):
     nav_selected = 1
+    report_form = ReportForm()
+    if request.POST:
+        report_form = ReportForm(request.POST)
+        if report_form.is_valid():
+            date_from = report_form.cleaned_data.get("date_from")
+            date_to = report_form.cleaned_data.get("date_to")
+            days = (date_to - date_from).days
+
+            supplies = Supply.objects.filter(date__gte=date_from, date__lte=date_to)
+            if supplies:
+                animals = SuppliedAnimal.objects.filter(supply__in=supplies)
+                consumables = SuppliedConsumable.objects.filter(supply__in=supplies)
     return render(request, "common/reports.html", locals())
