@@ -23,6 +23,9 @@ class AnimalType(models.Model):
     def __unicode__(self):
         return u"%s" % self.name
 
+    def get_needs(self):
+        return AnimalNeed.objects.filter(animal_type=self)
+
 
 class ConsumableGroup(models.Model):
     name = models.CharField(max_length=255)
@@ -44,6 +47,9 @@ class AnimalNeed(models.Model):
     consumable_per_day = models.IntegerField()
     consumable_type = models.ForeignKey(ConsumableType)
 
+    def __unicode__(self):
+        return u"потребность <%s> в <%s> - %s " % (self.animal_type, self.consumable_type, self.consumable_per_day)
+
 
 class Supply(models.Model):
     date = models.DateField()
@@ -56,7 +62,7 @@ class Supply(models.Model):
         return SuppliedConsumable.objects.filter(supply=self)
 
     def __unicode__(self):
-        return "Поставка %s" % self.id
+        return "Поставка %s от %s" % (self.id, self.date)
 
 
 class SuppliedAnimal(models.Model):

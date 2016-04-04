@@ -15,14 +15,28 @@
     <div class="container">
         <div class="row">
             <div id="report_continer" class="col-xs-12 col-sm-9">
-                {% for item in animals %}
-                    <p>{{ item }}</p>
-                {% endfor %}
-                <p>---</p>
-                {% for item in consumables %}
-                    <p>{{ item }}</p>
-                {% endfor %}
-                <hr>
+                {% if report %}
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Событие</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        {% for item in report %}
+                            <tr>
+                                <td>{{ item.0 }}</td>
+                                <td>{{ item.1 }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="alert alert-warning" role="alert">В указанный событий нет</div>
+                {% endif %}
+
             </div>
             <div  class="col-xs-12 col-sm-3">
                 {% include "common/widgets/report_form.html" with form=report_form %}

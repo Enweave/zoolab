@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from models import Supply, SuppliedAnimal, SuppliedConsumable
+from models import Supply, SuppliedAnimal, SuppliedConsumable, AnimalGroup
 from django import forms
 
 
@@ -40,10 +40,9 @@ class AddConsumableForm(forms.ModelForm):
 
 
 class ReportForm(forms.Form):
-    date_from = forms.DateField(
-        widget=forms.DateInput(),
-        label=u"От",
-        input_formats=["%d/%m/%Y"]
+    group = forms.ChoiceField(
+        choices=AnimalGroup.objects.all().values_list("id", "name"),
+        label=u"Группа"
     )
 
     date_to = forms.DateField(
