@@ -40,6 +40,8 @@ class AddConsumableForm(forms.ModelForm):
 
 
 class ReportForm(forms.Form):
+
+
     group = forms.ChoiceField(
         choices=AnimalGroup.objects.all().values_list("id", "name"),
         label=u"Группа"
@@ -47,6 +49,12 @@ class ReportForm(forms.Form):
 
     date_to = forms.DateField(
         widget=forms.DateInput(),
-        label=u"До",
+        label=u"Рассчитать до",
         input_formats=["%d/%m/%Y"]
+    )
+
+    spawn = forms.BooleanField(
+        label=u"Учитывать размножение",
+        initial=False,
+        required=False
     )
