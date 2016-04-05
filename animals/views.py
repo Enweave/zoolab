@@ -96,6 +96,12 @@ def remove_supply(request, pk):
     return HttpResponseRedirect("/")
 
 
+def add_report_row(date, animal_name, count):
+    return {
+        "date": date,
+        "content": "%s x %s" % (animal_name, count)
+    }
+
 
 class ConsumablesStorage(object):
     def __init__(self):
@@ -145,8 +151,9 @@ class AnimalStorage(object):
                 }
             })
 
-    def die(self, iid, count):
+    def die(self, iid, count, date):
         existin = self.items.get(iid)
+        deaths = []
         if existin:
             result_count = existin.get("count") - count
             result_count = result_count if result_count > 0 else 0
@@ -157,8 +164,11 @@ class AnimalStorage(object):
                 "count": result_count if result_count > 0 else 0,
                 "female_count": result_female_count if result_female_count < female_count else female_count
             })
+            deaths.append(add_report_row(date, existin.get("name"), count))
+        return deaths
 
-    def breed(self):
+    def breed(self, date=None):
+        new_ones = []
         for item in self.items.values():
             pairs = min([item.get("count") - item.get("female_count"), item.get("female_count")])
             new_breed = int(math.floor(pairs*item.get("breed_rate")))
@@ -166,11 +176,19 @@ class AnimalStorage(object):
                 "count": item.get("count") + new_breed,
                 "female_count": item.get("female_count") + new_breed/2
             })
+            if new_breed > 0:
+                new_ones.append(add_report_row(date, item.get("name"), new_breed))
+        return new_ones
 
 def reports_page(request):
     DATEFORMAT = '%d/%m/%Y'
     nav_selected = 1
     report_form = ReportForm()
+
+    recommendations = []
+    deaths = []
+    spawns = []
+
     if request.POST:
         report_form = ReportForm(request.POST)
         if report_form.is_valid():
@@ -182,15 +200,15 @@ def reports_page(request):
             spawn = report_form.cleaned_data.get("spawn")
             supplies = list(Supply.objects.filter(date__lte=date_to).order_by("date"))
             if supplies:
-                recomendations = []
+
 
                 animals = AnimalStorage()
                 consumables = ConsumablesStorage()
 
                 def make_report_row(date, consumable_name, count):
-
-                    return {"date": date,
-                            "content": "%s x %s" % (consumable_name, count)
+                    return {
+                        "date": date,
+                        "content": "%s x %s" % (consumable_name, count)
                     }
 
                 def process_phase(supply, span):
@@ -209,7 +227,9 @@ def reports_page(request):
                     if span > 0:
 
                         for v in range(0, span):
+                            report_entry_date = (supply.date + datetime.timedelta(days=v)).strftime(DATEFORMAT)
                             #feeding
+
                             for aiid, animal in animals.items.iteritems():
                                 lowest_efficiency = 0
                                 highest_need = None
@@ -224,18 +244,21 @@ def reports_page(request):
                                             lowest_efficiency = efficiency
                                             highest_need = need
                                         if efficiency < 0:
-                                            recomendations.append(make_report_row(
-                                                (supply.date + datetime.timedelta(days=v)).strftime(DATEFORMAT),
+                                            recommendations.append(add_report_row(
+                                                report_entry_date,
                                                 need.consumable_type.name,
-                                                -efficiency
+                                                -efficiency,
                                             ))
                                 if lowest_efficiency < 0 < current_animal_count:
                                     dead_count = -int(math.ceil(float(lowest_efficiency) * highest_need.consumable_per_day))
-                                    animals.die(aiid, dead_count)
-
+                                    new_deaths = animals.die(aiid, dead_count, report_entry_date)
+                                    for d in new_deaths:
+                                        deaths.append(d)
                             #breeding
                             if spawn:
-                                animals.breed()
+                                new_spawns = animals.breed(report_entry_date)
+                                for n in new_spawns:
+                                    spawns.append(n)
 
                 for i, c_supply in enumerate(supplies[:-1]):
                     c_span = (supplies[i+1].date - c_supply.date).days
