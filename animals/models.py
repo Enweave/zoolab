@@ -62,7 +62,7 @@ class Supply(models.Model):
         return SuppliedConsumable.objects.filter(supply=self)
 
     def __unicode__(self):
-        return "Поставка %s от %s" % (self.id, self.date)
+        return "Поставка от %s" % self.date
 
 
 class SuppliedAnimal(models.Model):
