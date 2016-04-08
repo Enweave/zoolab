@@ -9,6 +9,9 @@ def get_input_date_format():
 
 
 class SupplyForm(forms.Form):
+    """
+        Основа для формы поставки
+    """
     date = forms.DateField(
         widget=forms.DateInput(),
         label=u"Дата поступления",
@@ -24,6 +27,9 @@ class SupplyForm(forms.Form):
 
 
 class AddAnimalForm(forms.ModelForm):
+    """
+        Используется для генерации полей параметров добавленных в поставку животных
+    """
     class Meta:
         model = SuppliedAnimal
         exclude = ("supply",)
@@ -34,6 +40,9 @@ class AddAnimalForm(forms.ModelForm):
 
 
 class AddConsumableForm(forms.ModelForm):
+    """
+        Используется для генерации полей параметров добавленных в поставку потребностей
+    """
     class Meta:
         model = SuppliedConsumable
         exclude = ("supply",)
@@ -44,6 +53,9 @@ class AddConsumableForm(forms.ModelForm):
 
 
 class ReportForm(forms.Form):
+    """
+        Форма для запроса отчёта
+    """
     group = forms.ChoiceField(
         choices=AnimalGroup.objects.all().values_list("id", "name"),
         label=u"Группа"
