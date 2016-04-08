@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
-import json
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 
-from django.shortcuts import render, get_object_or_404
+from django.core.urlresolvers import reverse
+from django.http import JsonResponse, HttpResponseRedirect
+
+from django.shortcuts import render
 from django.template.loader import render_to_string
-from animals.forms import SupplyForm, AddAnimalForm, AddConsumableForm, ReportForm
-from animals.models import Supply, AnimalType, AnimalGroup, SuppliedAnimal, SuppliedConsumable, ConsumableType, \
-    AnimalNeed
+from animals.forms import SupplyForm, AddAnimalForm, AddConsumableForm, ReportForm, get_input_date_format
+from animals.models import Supply, AnimalType, SuppliedAnimal, SuppliedConsumable, ConsumableType
 from django.contrib import messages
 import datetime
-import time
 import math
+
 
 def get_animals(request):
     if request.is_ajax():
@@ -180,8 +179,9 @@ class AnimalStorage(object):
                 new_ones.append(add_report_row(date, item.get("name"), new_breed))
         return new_ones
 
+
 def reports_page(request):
-    DATEFORMAT = '%d/%m/%Y'
+    DATEFORMAT = get_input_date_format()
     nav_selected = 1
     report_form = ReportForm()
 
@@ -267,7 +267,4 @@ def reports_page(request):
                 last_span = (date_to - supplies[-1].date).days
                 last_supply = supplies[-1]
                 process_phase(last_supply, last_span)
-
-
-
     return render(request, "common/reports.html", locals())

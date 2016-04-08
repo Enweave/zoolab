@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from models import Supply, SuppliedAnimal, SuppliedConsumable, AnimalGroup
+from models import SuppliedAnimal, SuppliedConsumable, AnimalGroup
 from django import forms
+
+
+def get_input_date_format():
+    return "%d/%m/%Y"
 
 
 class SupplyForm(forms.Form):
     date = forms.DateField(
         widget=forms.DateInput(),
         label=u"Дата поступления",
-        input_formats=["%d/%m/%Y"]
+        input_formats=[get_input_date_format()]
     )
 
     comment = forms.CharField(
@@ -40,8 +44,6 @@ class AddConsumableForm(forms.ModelForm):
 
 
 class ReportForm(forms.Form):
-
-
     group = forms.ChoiceField(
         choices=AnimalGroup.objects.all().values_list("id", "name"),
         label=u"Группа"
@@ -50,7 +52,7 @@ class ReportForm(forms.Form):
     date_to = forms.DateField(
         widget=forms.DateInput(),
         label=u"Рассчитать до",
-        input_formats=["%d/%m/%Y"]
+        input_formats=[get_input_date_format()]
     )
 
     spawn = forms.BooleanField(

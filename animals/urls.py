@@ -8,5 +8,4 @@ urlpatterns = patterns('animals.views',
     url(r'^get_animals/$','get_animals', name="get-animals"),
     url(r'^get_consumables/$','get_consumables', name="get-consumables"),
     url(r'^remove_supply/(?P<pk>[-\d]+)/', 'remove_supply', name="remove_supply"),
-    # url(r'^animal_groups/(?P<pk>[-\d]+)/', 'animal_group_detail',name='animal-group-detail'),
 )

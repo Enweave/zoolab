@@ -11,7 +11,6 @@ from animals.models import SuppliedConsumable
 from animals.models import Supply
 
 
-
 class AnimalGroupAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
@@ -46,13 +45,4 @@ class AnimalNeedAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AnimalNeed, AnimalNeedAdmin)
-
-
-# class SupplyAdmin(admin.ModelAdmin):
-#     list_display = ("id", "date",)
-
-# admin.site.register(Supply, SupplyAdmin)
-admin.site.register(Supply)
-# admin.site.register(SuppliedAnimal)
-# admin.site.register(SuppliedConsumable)
 

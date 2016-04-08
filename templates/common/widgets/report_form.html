@@ -3,7 +3,7 @@
 <form method="post" action="{% url "animals:reports" %}" id="report_form">
     {% csrf_token %}
     {% for field in form %}
-        <div class="form-group{% if field.is_hidden %} hidden{% endif %}">
+        <div class="form-group{% if field.is_hidden %} hidden{% endif %} {% if field.errors %}has-error{% endif %}">
             <label class="control-label">{{ field.label }}</label>
             {% if field.field.required %}
                 {{ field|append_attr:"required:required"|add_class:"form-control" }}
