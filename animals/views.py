@@ -12,6 +12,7 @@ import datetime
 import math
 
 
+# Генерирует поля формы при добавлении животного в поставку
 def get_animals(request):
     if request.is_ajax():
         form = AddAnimalForm()
@@ -21,6 +22,7 @@ def get_animals(request):
     return HttpResponseRedirect("/")
 
 
+# Генерирует поля формы при добавлении потребности в поставку
 def get_consumables(request):
     if request.is_ajax():
         form = AddConsumableForm()
@@ -30,21 +32,34 @@ def get_consumables(request):
     return HttpResponseRedirect("/")
 
 
+# генерирует страницу добавления и просмотра поставок
 def supplies_page(request):
+    # выделенный пункт навигации
     nav_selected = 0
     supplies = Supply.objects.all().order_by("-date")
 
     form = SupplyForm()
     if request.POST:
+        # Основные поля поставки фиксируем с помощью объекта формы
         form = SupplyForm(request.POST)
         if form.is_valid():
+            # Животных одинакового пола и типа будем объединять, складывае количество
+            # для этого заводим словарь
             grouped_animal_types = {}
+            
+            # получаем данные животных.
+            # в запросе ожидаем увидеть массивы данных по одинаковым ключам : animal_type, animal_gender, animal_count,
+            # поскольку все поля в мини-формах для животных являются обязательными, каждый параметр животного
+            # будет иметь одинаковый индекс в соответствующем массиве.
+            # но вообще это плохая затея ;)
             for i, animal_type in enumerate(request.POST.getlist("animal_type", ())):
                 gender = request.POST.getlist("animal_gender")[i]
                 count = int(request.POST.getlist("animal_count")[i])
-
+                
+                # идентификатор группы
                 group_id = "%s%s" % (animal_type, gender)
 
+                # вносим в группу
                 current_group = grouped_animal_types.get(group_id, {
                     "type": animal_type,
                     "gender": gender,
@@ -53,11 +68,14 @@ def supplies_page(request):
 
                 grouped_animal_types.update({group_id: current_group})
 
+            # c потребностями почти то же самое,
+            # только без группировки
             consumables = []
             for i, consumble_type in enumerate(request.POST.getlist("consumable_type", ())):
                 consumables.append({"type": consumble_type, "count": int(request.POST.getlist("consumable_count")[i])})
 
             if grouped_animal_types or consumables:
+                # добавляем поставку только в том случае, если есть животные или потребности
                 new_supply = Supply(**form.cleaned_data)
                 new_supply.save()
                 for supplied_animal in grouped_animal_types.values():
@@ -77,10 +95,12 @@ def supplies_page(request):
                     )
                     new_supplied_consumable.save()
                 messages.success(request, u"Успешно добавлена %s" % new_supply)
+            # после успешной поставки отправляем редирект на страницу поставок, 
+            # чтобы исключить случайную повторную отправку формы  
             return HttpResponseRedirect(reverse('animals:supplies'))
     return render(request, "common/supplies.html", locals())
 
-
+# удаления поставки
 def remove_supply(request, pk):
     if request.POST and request.is_ajax():
         supplies = Supply.objects.filter(id=pk)
@@ -94,7 +114,7 @@ def remove_supply(request, pk):
 
     return HttpResponseRedirect("/")
 
-
+# вспомогательная функция добавления строчки в отчёт
 def add_report_row(date, animal_name, count):
     return {
         "date": date,
