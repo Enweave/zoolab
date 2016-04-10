@@ -95,6 +95,7 @@ def supplies_page(request):
                     )
                     new_supplied_consumable.save()
                 messages.success(request, u"Успешно добавлена %s" % new_supply)
+                
             # после успешной поставки отправляем редирект на страницу поставок, 
             # чтобы исключить случайную повторную отправку формы  
             return HttpResponseRedirect(reverse('animals:supplies'))
@@ -122,11 +123,14 @@ def add_report_row(date, animal_name, count):
     }
 
 
+# Вспомогательный класс
+# используется при генерации отчёта
+# помещает в себе типы потребностей + количество 
 class ConsumablesStorage(object):
     def __init__(self):
         self.items = {}
 
-    # add new or update existing
+    # добавить новый тип + количество либо повысить количество уже имеющегося типа
     def update_item(self, iid, count):
         existin = self.items.get(iid)
         if existin:
@@ -134,7 +138,8 @@ class ConsumablesStorage(object):
         else:
             self.items.update({iid: count})
 
-    #decreases existing, returns remaining quantity
+    # уменьшить количество определённого типа
+    # возвращает число - количество потребности, которого не хватает
     def take_item(self, iid, count):
         existin = self.items.get(iid)
         if existin:
@@ -144,11 +149,16 @@ class ConsumablesStorage(object):
         else:
             return -count
 
-
+# Вспомогательный класс
+# используется при генерации отчёта
+# помещает в себе типы животных с учётом пола + количество + типы потребностей для каждого типа животного
+# учёт пола животного реализуется с помощью дополнительной переменной, которая хранит количество животных женского пола
 class AnimalStorage(object):
     def __init__(self):
         self.items = {}
 
+    # добавляем новый тип животного, ессли отсутствует в self.items,
+    # если такой тип уже есть - повышаем количество
     def append_item(self, iid, name, count, needs, is_female=False):
         existin = self.items.get(iid)
         if existin:
@@ -166,10 +176,12 @@ class AnimalStorage(object):
                     "needs": needs,
                     "count": count,
                     "female_count": count if is_female else 0,
-                    "breed_rate": 1,
+                    "breed_rate": 1, # скорость "рождения" не была оговорена в ТЗ, но мы предусматриваем возможность её поменять
                 }
             })
 
+    # убавляет количество животных указанного типа на указанное количество
+    # возвращает список элементов, содержащих информацию о погибших животных, которые нужно добавить в отчёт
     def die(self, iid, count, date):
         existin = self.items.get(iid)
         deaths = []
@@ -177,6 +189,7 @@ class AnimalStorage(object):
             result_count = existin.get("count") - count
             result_count = result_count if result_count > 0 else 0
 
+            # Животные "умирают" таким образом, чтобы количество разнополых пар было максимальным 
             female_count = existin.get("female_count")
             result_female_count = result_count/2
             existin.update({
@@ -186,6 +199,8 @@ class AnimalStorage(object):
             deaths.append(add_report_row(date, existin.get("name"), count))
         return deaths
 
+    # добавляет количество родившихся животных
+    # возвращает эелементы для отчёта
     def breed(self, date=None):
         new_ones = []
         for item in self.items.values():
@@ -199,12 +214,13 @@ class AnimalStorage(object):
                 new_ones.append(add_report_row(date, item.get("name"), new_breed))
         return new_ones
 
-
+# Генерирует с формой для запроса отчёта и,собственно, сам отчёт, если форма отправлена
 def reports_page(request):
     DATEFORMAT = get_input_date_format()
     nav_selected = 1
     report_form = ReportForm()
 
+    # "разделы" отчёта
     recommendations = []
     deaths = []
     spawns = []
@@ -212,27 +228,32 @@ def reports_page(request):
     if request.POST:
         report_form = ReportForm(request.POST)
         if report_form.is_valid():
+            # используется в шаблоне, чтобы определить, показывать сообщение или отчёт
             has_report = True
+            
+            # извлекаем ключ из модели животного в поставке ключ, которые определяет женский пол
             gender_female = SuppliedAnimal.GENDERS[1][0]
 
+            # извлекаем данные из формы
             date_to = report_form.cleaned_data.get("date_to")
             selected_animal_group_id = report_form.cleaned_data.get("group")
-            spawn = report_form.cleaned_data.get("spawn")
+            spawn = report_form.cleaned_data.get("spawn") # флаг "учитывать размножение"
+            
+            # извлекаем из БД поставки до и включая указанную дату
             supplies = list(Supply.objects.filter(date__lte=date_to).order_by("date"))
             if supplies:
-
-
+                # если есть поставки - инициализируем вспомогательные классы
                 animals = AnimalStorage()
                 consumables = ConsumablesStorage()
 
-                def make_report_row(date, consumable_name, count):
-                    return {
-                        "date": date,
-                        "content": "%s x %s" % (consumable_name, count)
-                    }
-
+                # симулирует процессы в группе животных втечение указанного количества дней
+                # образно говоря, каждый день протекает в 3 этапа:
+                #   1) внесение животных и потребностей
+                #   2) потребление потребностей и гибель животных в случае дефицита
+                #   3) размножение
+                # функция определена здесь умышленно, чтобы бы доступ к вспомогательным классам
                 def process_phase(supply, span):
-                    #supply arrived
+                    # первым этапом добавляем животных из указанной поставки...
                     for a in SuppliedAnimal.objects.filter(supply=supply, animal_type__id=selected_animal_group_id):
                         animals.append_item(
                             a.animal_type.id,
@@ -241,50 +262,80 @@ def reports_page(request):
                             a.animal_type.get_needs(),
                             a.animal_gender == gender_female
                         )
+                    # ...и потребности
                     for s in SuppliedConsumable.objects.filter(supply=supply):
                         consumables.update_item(s.consumable_type.id, s.consumable_count)
 
+                    # если количество дней 0, дальше ничего не делаем,
+                    # это сделано потому, что в один день может быть произведено несколько поставок
+                    # и перед произведением расчётов необходимо добавить во вспомогательные классы всё поступившее
                     if span > 0:
-
+                        # симулируем дни
                         for v in range(0, span):
+                            # высчитываем дату для отчёта элемента отчёта
                             report_entry_date = (supply.date + datetime.timedelta(days=v)).strftime(DATEFORMAT)
-                            #feeding
-
+                            
+                            # второй этап - симулируем потребление потребностей
+                            
+                            # однако, есть небольшой изьян - потребности распределяются между типами животных неравномерно
                             for aiid, animal in animals.items.iteritems():
+                                # количество потребности, которой не хватило больше всего
                                 lowest_efficiency = 0
+                                
+                                # тип потребности, которой не хватило больше всего
                                 highest_need = None
+                                
                                 current_animal_count = animal.get("count")
+                                
+                                # проходим по всем типам потребностей для текущего типа животного
                                 for need in animal.get("needs"):
                                     if current_animal_count > 0:
+                                        # убавляем количство имеющихся потребностей попутно выясняя, сколько остаётся
                                         efficiency = consumables.take_item(
                                             need.consumable_type.id,
                                             need.consumable_per_day * current_animal_count
                                         )
+                                        
+                                        # отмечаем остаток, чтобы впоследствие выяснить, какой потребности не хватает больше всего
                                         if efficiency < lowest_efficiency:
                                             lowest_efficiency = efficiency
                                             highest_need = need
+                                            
+                                        # если имеется дефицит в какой потребности - создаём элемент отчёта
                                         if efficiency < 0:
                                             recommendations.append(add_report_row(
                                                 report_entry_date,
                                                 need.consumable_type.name,
                                                 -efficiency,
                                             ))
-                                if lowest_efficiency < 0 < current_animal_count:
+                                            
+                                # используя максимальный дефицит, подсчитываем, сколько животных погибнет
+                                if lowest_efficiency < 0:
                                     dead_count = -int(math.ceil(float(lowest_efficiency) * highest_need.consumable_per_day))
                                     new_deaths = animals.die(aiid, dead_count, report_entry_date)
+                                    # создаём элементы отчёта с информацией о погибших животных
                                     for d in new_deaths:
                                         deaths.append(d)
-                            #breeding
+                                        
+                            # 3-й этап - симулируем размножение животных
                             if spawn:
                                 new_spawns = animals.breed(report_entry_date)
+                                # создаём элементы отчёта с информацией о "родившихся" животных
                                 for n in new_spawns:
                                     spawns.append(n)
 
+                # непосредственно, начало обработки отчёта
+                
+                # запускаем цикл по всем поставкам, кроме последней
                 for i, c_supply in enumerate(supplies[:-1]):
+                    # выясняем количество дней между текущей и последующей поставками
                     c_span = (supplies[i+1].date - c_supply.date).days
+                    # обрабатыываем полученный промежуток
                     process_phase(c_supply, c_span)
-
+                
+                # обрабатываем последнюю (или единственнуую) поставку
                 last_span = (date_to - supplies[-1].date).days
                 last_supply = supplies[-1]
                 process_phase(last_supply, last_span)
+                
     return render(request, "common/reports.html", locals())
