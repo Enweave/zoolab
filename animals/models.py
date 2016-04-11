@@ -39,8 +39,8 @@ class ConsumableGroup(models.Model):
         return u"%s" % self.name
 
     class Meta:
-        verbose_name = u"Тип животного"
-        verbose_name_plural = u"Типы животных"
+        verbose_name = u"Группа потребности"
+        verbose_name_plural = u"Группы потребностей"
 
 
 class ConsumableType(models.Model):
@@ -70,7 +70,7 @@ class AnimalNeed(models.Model):
 
     class Meta:
         verbose_name = u"Потребность животного"
-        verbose_name_plural = u"Потребность животных"
+        verbose_name_plural = u"Потребности животных"
 
 
 class Supply(models.Model):
